@@ -95,7 +95,7 @@ A modern, production-ready e-commerce platform built with **Spring Boot**, **Mon
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/vatsalchavda/ecommerce-platform.git
+   git clone git@github.com:vatsalchavda/ecommerce-platform.git
    cd ecommerce-platform
    ```
 
