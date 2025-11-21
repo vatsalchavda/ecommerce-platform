@@ -6,6 +6,10 @@ target/
 *.ipr
 .DS_Store
 
+# Personal learning notes (keep private)
+LEARNING_NOTES.md
+INTERVIEW_PREP.md
+
 # Maven
 .mvn/
 mvnw

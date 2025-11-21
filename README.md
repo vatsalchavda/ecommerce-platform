@@ -2,13 +2,9 @@
 
 A modern, production-ready e-commerce platform built with **Spring Boot**, **MongoDB**, **Kafka**, **React**, **Docker**, and **Kubernetes**.
 
-## 🎯 Project Goals
+## 🎯 Project Overview
 
-- Build a scalable microservices-based e-commerce platform
-- Demonstrate industry-standard development practices
-- Learn modern cloud-native technologies
-- Prepare for Senior Software Developer technical interviews
-- Understand distributed systems and event-driven architecture
+A scalable microservices-based e-commerce platform demonstrating modern cloud-native architecture, distributed systems, and event-driven design patterns.
 
 ## 🏗️ Architecture
 
@@ -188,28 +184,20 @@ Response: 400 Bad Request
 }
 ```
 
-## 🎓 Key Learnings & Concepts
+## 🔧 Technical Highlights
 
-### Design Patterns
-- **Repository Pattern** - Data access abstraction
-- **Service Layer Pattern** - Business logic separation
-- **DTO Pattern** - Data transfer objects
-- **Exception Handling Pattern** - Global error handling
+### Architecture & Design
+- **Microservices Architecture** - Independently deployable services
+- **Event-Driven Design** - Asynchronous communication via Kafka
+- **Repository Pattern** - Clean data access abstraction
+- **Layered Architecture** - Clear separation of concerns (Controller → Service → Repository)
 
-### Spring Boot Features
-- **Dependency Injection** - Constructor injection with Lombok
-- **Bean Validation** - Jakarta Validation API
-- **Spring Data MongoDB** - Repository abstraction
-- **RestControllerAdvice** - Global exception handling
-- **Swagger Integration** - Auto-generated API docs
-
-### Best Practices
-- ✅ Clean code architecture (Controller → Service → Repository)
-- ✅ Proper HTTP status codes
-- ✅ Input validation at multiple layers
-- ✅ Standardized error responses
-- ✅ Structured logging
-- ✅ Separation of concerns
+### Key Technologies
+- **Spring Boot 3.2.0** - Modern Java framework with dependency injection
+- **Spring Data MongoDB** - Reactive repository abstraction
+- **Bean Validation** - Request validation with Jakarta Validation API
+- **Global Exception Handling** - Centralized error management with @RestControllerAdvice
+- **OpenAPI/Swagger** - Interactive API documentation
 
 ## 📋 Roadmap
 
@@ -271,9 +259,11 @@ This project is for educational purposes.
 
 ## 👤 Author
 
-Built as a learning project to demonstrate modern microservices architecture and prepare for technical interviews.
+**Vatsal Chavda**
+
+A scalable, production-ready e-commerce platform showcasing modern microservices architecture.
 
 ---
 
-**Current Status:** Product Service is production-ready with validation and exception handling. Moving to Kafka integration next! 🚀
+**Status:** Product Service completed. Kafka integration in progress. 🚀
 
