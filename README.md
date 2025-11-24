@@ -488,7 +488,15 @@ spring:
 
 ## 🤝 Contributing
 
-This is a learning project. Feel free to fork and experiment!
+Want to add a new microservice or enhance existing ones? Check out our [Contributing Guide](CONTRIBUTING.md) for:
+
+- Step-by-step guide to adding new microservices
+- Code standards and architectural patterns
+- Kafka event integration guidelines
+- Testing best practices
+- Commit conventions
+
+The guide walks through the entire process using the existing Product Service as a reference.
 
 ## 📝 License
 
