@@ -52,6 +52,11 @@
             <version>${springdoc.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
         <!-- Lombok - Reduces boilerplate code -->
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -95,25 +95,103 @@ A scalable microservices-based e-commerce platform demonstrating modern cloud-na
    cd ecommerce-platform
    ```
 
-2. **Start MongoDB**
-   ```bash
-   docker run -d --name product-mongodb -p 27018:27017 mongo:7.0
+2. **Start Infrastructure**
+   ```powershell
+   # Start Product Service infrastructure (MongoDB, Kafka, Zookeeper)
+   .\scripts\product-service.ps1 --start
    ```
 
-3. **Build the project**
+3. **Build and Run**
    ```bash
    mvn clean install
-   ```
-
-4. **Run the application**
-   ```bash
    mvn spring-boot:run
    ```
 
-5. **Access Swagger UI**
+4. **Access Swagger UI**
    ```
    http://localhost:7070/swagger-ui/index.html
    ```
+
+5. **Check Service Status**
+   ```powershell
+   .\scripts\product-service.ps1 --status
+   ```
+
+6. **Stop Service**
+   ```powershell
+   # Stop Product Service (keeps Kafka running)
+   .\scripts\product-service.ps1 --stop
+   
+   # Stop all services including Kafka
+   .\scripts\manage-all.ps1 --stop
+   ```
+
+### Service Management Scripts
+
+```powershell
+# Product Service commands
+.\scripts\product-service.ps1 --start    # Start infrastructure
+.\scripts\product-service.ps1 --stop     # Stop infrastructure
+.\scripts\product-service.ps1 --status   # Check status
+.\scripts\product-service.ps1 --help     # Show help
+
+# Manage all services
+.\scripts\manage-all.ps1 --start         # Start all services
+.\scripts\manage-all.ps1 --stop          # Stop all services
+.\scripts\manage-all.ps1 --status        # Check all services
+.\scripts\manage-all.ps1 --help          # Show help
+```
+
+## 🛠️ Development Environment
+
+### Starting the Service
+
+```powershell
+# 1. Start infrastructure (MongoDB, Kafka, Zookeeper)
+.\scripts\product-service.ps1 --start
+
+# 2. Build and run the application
+mvn clean install -DskipTests
+mvn spring-boot:run
+
+# 3. Verify everything is running
+.\scripts\product-service.ps1 --status
+```
+
+### Stopping the Service
+
+```powershell
+# Stop Product Service (keeps Kafka running for other services)
+.\scripts\product-service.ps1 --stop
+
+# Stop all services including Kafka
+.\scripts\manage-all.ps1 --stop
+```
+
+### Checking Status
+
+```powershell
+# Check Product Service
+.\scripts\product-service.ps1 --status
+
+# Check all services
+.\scripts\manage-all.ps1 --status
+```
+
+### Manual Setup (Alternative)
+
+```bash
+# Start Kafka and Zookeeper
+docker compose up -d
+
+# Start MongoDB
+docker run -d --name product-mongodb -p 27018:27017 mongo:7.0
+
+# Build and run
+mvn clean install
+mvn spring-boot:run
+```
+
 
 ### Configuration
 
@@ -138,6 +216,12 @@ ecommerce-platform/
 │       │   └── ProductRepository.java          # Database access
 │       ├── model/
 │       │   └── Product.java                    # MongoDB entity
+│       ├── event/
+│       │   ├── ProductEvent.java               # Event DTO
+│       │   └── EventType.java                  # Event types
+│       ├── messaging/
+│       │   ├── KafkaProductProducer.java       # Kafka producer
+│       │   └── KafkaProductConsumer.java       # Kafka consumer
 │       ├── exception/
 │       │   ├── ProductNotFoundException.java   # Custom exception
 │       │   ├── ErrorResponse.java              # Error DTO
@@ -145,11 +229,39 @@ ecommerce-platform/
 │       └── dto/                                # Data Transfer Objects
 ├── src/main/resources/
 │   └── application.yml                         # Configuration
+├── scripts/
+│   ├── product-service.ps1                     # Service management
+│   ├── manage-all.ps1                          # All services management
+│   └── test-kafka.ps1                          # Kafka testing
+├── tools/
+│   └── seed-products.ps1                       # Data seeding utility
+├── docker-compose.yml                          # Kafka & Zookeeper
 ├── pom.xml                                     # Maven dependencies
 └── README.md
 ```
 
-## 🧪 Testing with Swagger UI
+## 🧪 Testing & Data Management
+
+### Seed Test Data
+
+Populate the database with realistic dummy products:
+
+```powershell
+# Add 50 products
+.\tools\seed-products.ps1 seed
+
+# Clear all products
+.\tools\seed-products.ps1 clear
+
+# Clear and reseed
+.\tools\seed-products.ps1 reseed
+```
+
+See `tools/README.md` for more details.
+
+### Manual Testing with Swagger UI
+
+Access Swagger UI at: `http://localhost:7070/swagger-ui.html`
 
 ### Create a Product
 ```json
@@ -184,6 +296,130 @@ Response: 400 Bad Request
 }
 ```
 
+## 📨 Kafka & Zookeeper - Event-Driven Messaging
+
+### What is Apache Kafka?
+
+**Apache Kafka** is a distributed event streaming platform used for building real-time data pipelines and streaming applications. In microservices architecture, Kafka enables **asynchronous, decoupled communication** between services.
+
+### Why Kafka for E-Commerce?
+
+In our platform, Kafka handles:
+- **Product Events** - Notify other services when products are created/updated/deleted
+- **Order Events** - Real-time order processing and status updates
+- **Inventory Events** - Stock level synchronization across services
+- **Decoupling** - Services don't need to know about each other directly
+- **Scalability** - Handle thousands of events per second
+- **Reliability** - Events are persisted and can be replayed
+
+### What is Zookeeper?
+
+**Apache Zookeeper** is a distributed coordination service that Kafka uses for:
+
+1. **Broker Management** - Tracks which Kafka brokers (servers) are alive
+2. **Leader Election** - Coordinates which broker leads each partition
+3. **Topic Metadata** - Stores configuration about topics and partitions
+4. **Cluster Coordination** - Manages distributed consensus
+
+**Note:** Kafka 3.x+ introduced KRaft mode (removes Zookeeper dependency), but Zookeeper is still industry standard and widely used in production.
+
+### Architecture in This Project
+
+```
+┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
+│  Product Service│─────────▶│   Kafka Broker  │◀────────│  Order Service  │
+│   (Producer)    │  Events  │                 │  Events │   (Consumer)    │
+└─────────────────┘         │   Port: 9092    │         └─────────────────┘
+                             │                 │
+                             │  Managed by:    │
+                             │   Zookeeper     │
+                             │   Port: 2181    │
+                             └─────────────────┘
+```
+
+### Event Flow Example
+
+1. **Product Service** creates a new product → publishes `ProductCreatedEvent` to Kafka
+2. **Kafka** stores the event in the `products` topic
+3. **Order Service** consumes the event → updates its product catalog cache
+4. **Inventory Service** consumes the event → initializes stock tracking
+
+### Running Kafka & Zookeeper
+
+**Start with Docker Compose:**
+```bash
+docker compose up -d
+```
+
+This starts:
+- **Zookeeper** on `localhost:2181`
+- **Kafka** on `localhost:9092`
+
+**Check running containers:**
+```bash
+docker ps
+```
+
+**View Kafka logs:**
+```bash
+docker logs ecommerce-platform-kafka-1
+```
+
+**Stop services:**
+```bash
+docker compose down
+```
+
+### Docker Compose Configuration
+
+Our `docker-compose.yml` uses **Confluent Platform images** (industry standard):
+
+- **Zookeeper**: `confluentinc/cp-zookeeper:7.5.0`
+  - Manages Kafka cluster metadata
+  - Port: 2181
+  
+- **Kafka**: `confluentinc/cp-kafka:7.5.0`
+  - Message broker
+  - Port: 9092
+  - Replication factor: 1 (single broker for local dev)
+
+### Kafka Topics in This Project
+
+| Topic Name | Purpose | Producer | Consumer |
+|------------|---------|----------|----------|
+| `products` | Product lifecycle events | Product Service | Order, Inventory Services |
+| `orders` | Order processing events | Order Service | Inventory, Notification Services |
+| `inventory` | Stock level updates | Inventory Service | Product Service |
+
+### Key Kafka Concepts
+
+- **Topic** - A category/stream of events (e.g., "products")
+- **Producer** - Service that publishes events to a topic
+- **Consumer** - Service that subscribes to and processes events
+- **Partition** - Topics are split into partitions for parallelism
+- **Offset** - Unique ID for each message in a partition
+- **Consumer Group** - Multiple consumers share workload
+
+### Spring Boot Kafka Integration
+
+We use **Spring Kafka** to:
+- Serialize/deserialize events as JSON
+- Auto-configure producers and consumers
+- Handle retries and error handling
+- Provide simple annotations (`@KafkaListener`)
+
+**Configuration** in `application.yml`:
+```yaml
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: ecommerce-group
+    producer:
+      key-serializer: StringSerializer
+      value-serializer: JsonSerializer
+```
+
 ## 🔧 Technical Highlights
 
 ### Architecture & Design
@@ -209,13 +445,14 @@ Response: 400 Bad Request
 - [x] Exception handling
 - [x] API documentation
 
-### Phase 2: Event-Driven Architecture ⏳ **IN PROGRESS**
-- [ ] Kafka setup (Docker)
-- [ ] Event publishing (ProductCreated, ProductUpdated, ProductDeleted)
-- [ ] Event consumers
-- [ ] Dead letter queue handling
+### Phase 2: Event-Driven Architecture ✅ **COMPLETED**
+- [x] Kafka setup (Docker Compose)
+- [x] Event publishing (ProductCreated, ProductUpdated, ProductDeleted)
+- [x] Event consumers
+- [x] Kafka producer/consumer configuration
+- [x] Event-driven service integration
 
-### Phase 3: Order Service ⏳
+### Phase 3: Order Service ⏳ **NEXT**
 - [ ] Order management microservice
 - [ ] Kafka integration
 - [ ] Product event consumption
