@@ -1,4 +1,4 @@
-# E‑Commerce Platform — Product Service
+# E‑Commerce Platform
 
 Product catalog microservice providing CRUD APIs with MongoDB persistence, Kafka events, and OpenAPI documentation.
 
