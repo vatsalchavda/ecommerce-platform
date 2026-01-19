@@ -32,8 +32,8 @@ Product catalog microservice providing CRUD APIs with MongoDB persistence, Kafka
   - mvn spring-boot:run
 - Defaults:
   - App: http://localhost:7070
-  - MongoDB: localhost:27018 (database: product-db)
-  - Kafka: localhost:9092
+  - MongoDB: http://localhost:27018 (database: product-db)
+  - Kafka: https://localhost:9092
 - Optional: seed sample data
   - .\tools\seed-products.ps1 seed
 
